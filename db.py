@@ -3,14 +3,17 @@ import mysql.connector
 from mysql.connector import Error
 
 def get_connection():
-    """Return a MySQL connection using environment variables."""
+    """Return a MySQL connection.
+    Reads Railway's native variable names (MYSQLHOST, MYSQLUSER, etc.)
+    Falls back to local defaults for development.
+    """
     try:
         conn = mysql.connector.connect(
-            host     = os.environ.get("DB_HOST",     "localhost"),
-            port     = int(os.environ.get("DB_PORT", 3306)),
-            user     = os.environ.get("DB_USER",     "root"),
-            password = os.environ.get("DB_PASSWORD", "your_password"),  # local fallback
-            database = os.environ.get("DB_NAME",     "bus_reservation"),
+            host     = os.environ.get("MYSQLHOST",     "localhost"),
+            port     = int(os.environ.get("MYSQLPORT", 3306)),
+            user     = os.environ.get("MYSQLUSER",     "root"),
+            password = os.environ.get("MYSQLPASSWORD", "your_password"),  # change for local
+            database = os.environ.get("MYSQL_DATABASE","bus_reservation"),
         )
         return conn
     except Error as e:
