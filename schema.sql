@@ -1,8 +1,6 @@
 -- Bus Ticket Reservation System - Full Schema
--- Drop and recreate for a clean slate
-DROP DATABASE IF EXISTS bus_reservation;
-CREATE DATABASE bus_reservation;
-USE bus_reservation;
+-- Works for both local (bus_reservation) and Railway (railway)
+-- Run this after connecting to your target database
 
 CREATE TABLE buses (
     id INT AUTO_INCREMENT PRIMARY KEY,
