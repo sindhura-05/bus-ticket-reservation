@@ -4,7 +4,7 @@
 {% block content %}
 <div class="update-page">
   <div class="book-header">
-    <a href="{{ url_for('my_tickets', email=reservation.passenger_email) }}" class="back-link">
+    <a href="{{ url_for('my_tickets') }}" class="back-link">
       <i class="fas fa-arrow-left"></i> Back to my tickets
     </a>
     <h1>Update Booking</h1>
@@ -51,9 +51,7 @@
           <button type="submit" class="btn-confirm">
             <i class="fas fa-save"></i> Save Changes
           </button>
-          <a href="{{ url_for('my_tickets', email=reservation.passenger_email) }}" class="btn-discard">
-            Discard
-          </a>
+          <a href="{{ url_for('my_tickets') }}" class="btn-discard">Discard</a>
         </div>
       </form>
     </div>
