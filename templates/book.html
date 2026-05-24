@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Select Seat & Book — BusBook{% endblock %}
+
+{% block content %}
+<div class="book-page">
+  <div class="book-header">
+    <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-left"></i> Back to results</a>
+    <h1>Select Your Seat</h1>
+  </div>
+
+  <div class="book-layout">
+
+    <!-- Seat map -->
+    <div class="seat-section card">
+      <h3><i class="fas fa-chair"></i> Seat Layout — {{ bus.bus_number }}</h3>
+      <div class="seat-legend">
+        <span class="legend-item"><span class="seat-demo available"></span> Available</span>
+        <span class="legend-item"><span class="seat-demo booked"></span> Booked</span>
+        <span class="legend-item"><span class="seat-demo selected"></span> Your Seat</span>
+      </div>
+
+      <div class="bus-layout">
+        <div class="driver-area"><i class="fas fa-steering-wheel"></i></div>
+        <div class="seats-grid">
+          {% for i in range(1, bus.total_seats + 1) %}
+            {% if i in booked_seats %}
+              <div class="seat booked" title="Seat {{ i }} — Booked">{{ i }}</div>
+            {% else %}
+              <div class="seat available" onclick="selectSeat({{ i }}, this)" title="Seat {{ i }}">{{ i }}</div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <p class="selected-seat-info" id="seatInfo">No seat selected</p>
+    </div>
+
+    <!-- Booking form -->
+    <div class="booking-form-section">
+      <!-- Bus summary card -->
+      <div class="card bus-summary-card">
+        <div class="bsc-operator">{{ bus.operator_name }}
+          <span class="bus-type-badge type-{{ bus.bus_type|replace(' ','-')|lower }}">{{ bus.bus_type }}</span>
+        </div>
+        <div class="bsc-route">
+          <div class="bsc-point">
+            <span class="bsc-time">{{ bus.dep_fmt }}</span>
+            <span class="bsc-city">{{ bus.source }}</span>
+          </div>
+          <div class="bsc-arrow"><i class="fas fa-long-arrow-alt-right"></i><span>{{ bus.duration }}</span></div>
+          <div class="bsc-point">
+            <span class="bsc-time">{{ bus.arr_fmt }}</span>
+            <span class="bsc-city">{{ bus.destination }}</span>
+          </div>
+        </div>
+        <div class="bsc-amenities">
+          {% for a in bus.amenity_list %}
+          <span class="amenity-tag">
+            {% if a=='WiFi' %}<i class="fas fa-wifi"></i>
+            {% elif a=='Charging' %}<i class="fas fa-plug"></i>
+            {% elif a=='Blanket' %}<i class="fas fa-bed"></i>
+            {% elif a=='Water' %}<i class="fas fa-tint"></i>
+            {% elif a=='Snacks' %}<i class="fas fa-cookie"></i>
+            {% else %}<i class="fas fa-check"></i>{% endif %}
+            {{ a }}
+          </span>
+          {% endfor %}
+        </div>
+        <div class="bsc-price">₹{{ "%.0f"|format(bus.price) }} <span>per seat</span></div>
+      </div>
+
+      <!-- Passenger form -->
+      <div class="card">
+        <h3><i class="fas fa-user"></i> Passenger Details</h3>
+        <form action="{{ url_for('book', bus_id=bus.id) }}" method="POST" id="bookForm">
+          <input type="hidden" name="travel_date" value="{{ travel_date }}"/>
+          <input type="hidden" name="seat_number" id="seatInput" value=""/>
+
+          <div class="form-group">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" name="passenger_name" placeholder="As on ID card" required/>
+          </div>
+          <div class="form-group">
+            <label>Email Address <span class="req">*</span></label>
+            <input type="email" name="passenger_email" placeholder="you@example.com" required/>
+          </div>
+          <div class="form-group">
+            <label>Mobile Number <span class="req">*</span></label>
+            <input type="tel" name="passenger_phone" placeholder="+91 98765 43210" required/>
+          </div>
+
+          <div class="fare-summary">
+            <div class="fare-row"><span>Base Fare</span><span id="baseFare">—</span></div>
+            <div class="fare-row"><span>Service Fee</span><span>₹30</span></div>
+            <div class="fare-row total"><span>Total</span><span id="totalFare">—</span></div>
+          </div>
+
+          <button type="submit" class="btn-confirm" id="confirmBtn" disabled>
+            <i class="fas fa-lock"></i> Confirm Booking
+          </button>
+          <p class="secure-note"><i class="fas fa-shield-alt"></i> 100% secure booking</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PRICE = {{ bus.price }};
+let selectedSeat = null;
+
+function selectSeat(num, el) {
+  if (el.classList.contains('booked')) return;
+  document.querySelectorAll('.seat.selected').forEach(s => {
+    s.classList.remove('selected');
+    s.classList.add('available');
+  });
+  el.classList.remove('available');
+  el.classList.add('selected');
+  selectedSeat = num;
+  document.getElementById('seatInput').value = num;
+  document.getElementById('seatInfo').textContent = `Seat ${num} selected`;
+  document.getElementById('baseFare').textContent = `₹${PRICE.toFixed(0)}`;
+  document.getElementById('totalFare').textContent = `₹${(PRICE + 30).toFixed(0)}`;
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+document.getElementById('bookForm').addEventListener('submit', function(e) {
+  if (!selectedSeat) {
+    e.preventDefault();
+    alert('Please select a seat before confirming.');
+  }
+});
+</script>
+{% endblock %}

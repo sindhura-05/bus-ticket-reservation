@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}{{ source }} to {{ destination }} — BusBook{% endblock %}
+
+{% block content %}
+<div class="results-page">
+
+  <!-- Top search bar (compact) -->
+  <div class="results-search-bar">
+    <form action="{{ url_for('search') }}" method="GET" class="results-search-form">
+      <input type="text" name="source" value="{{ source }}" placeholder="From" required list="city-list2"/>
+      <i class="fas fa-exchange-alt swap-icon"></i>
+      <input type="text" name="destination" value="{{ destination }}" placeholder="To" required list="city-list2"/>
+      <input type="date" name="travel_date" value="{{ travel_date }}" required/>
+      <button type="submit" class="btn-search-sm"><i class="fas fa-search"></i> Search</button>
+    </form>
+    <datalist id="city-list2">
+      {% for city in cities %}<option value="{{ city }}">{% endfor %}
+    </datalist>
+  </div>
+
+  <div class="results-layout">
+
+    <!-- Sidebar filters -->
+    <aside class="filters-sidebar">
+      <h3><i class="fas fa-filter"></i> Filters</h3>
+      <form method="GET" action="{{ url_for('search') }}" id="filterForm">
+        <input type="hidden" name="source" value="{{ source }}"/>
+        <input type="hidden" name="destination" value="{{ destination }}"/>
+        <input type="hidden" name="travel_date" value="{{ travel_date }}"/>
+
+        <div class="filter-group">
+          <h4>Bus Type</h4>
+          {% for bt in bus_types %}
+          <label class="filter-check">
+            <input type="radio" name="bus_type" value="{{ bt }}" {% if bus_type==bt %}checked{% endif %}
+                   onchange="document.getElementById('filterForm').submit()"/>
+            {{ bt }}
+          </label>
+          {% endfor %}
+          {% if bus_type %}
+          <a href="{{ url_for('search', source=source, destination=destination, travel_date=travel_date) }}"
+             class="clear-filter">Clear filter</a>
+          {% endif %}
+        </div>
+
+        <div class="filter-group">
+          <h4>Sort By</h4>
+          {% for val, label in [('price','Price'),('rating','Rating'),('seats','Seats'),('duration','Duration')] %}
+          <label class="filter-check">
+            <input type="radio" name="sort_by" value="{{ val }}" {% if sort_by==val %}checked{% endif %}
+                   onchange="document.getElementById('filterForm').submit()"/>
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+      </form>
+    </aside>
+
+    <!-- Results -->
+    <main class="results-main">
+      <div class="results-header">
+        <div>
+          <h2>{{ source }} <i class="fas fa-arrow-right"></i> {{ destination }}</h2>
+          <span class="results-meta">{{ travel_date }} &nbsp;·&nbsp;
+            <strong>{{ buses|length }}</strong> bus{{ 'es' if buses|length != 1 else '' }} found
+          </span>
+        </div>
+      </div>
+
+      {% if buses %}
+        {% for bus in buses %}
+        <div class="bus-result-card">
+          <div class="brc-top">
+            <div class="brc-operator">
+              <span class="operator-name">{{ bus.operator_name }}</span>
+              <span class="bus-type-badge type-{{ bus.bus_type|replace(' ','-')|lower }}">{{ bus.bus_type }}</span>
+            </div>
+            <div class="brc-rating">
+              <i class="fas fa-star"></i> {{ bus.rating }}
+              <span class="review-count">({{ bus.reviews }} reviews)</span>
+            </div>
+          </div>
+
+          <div class="brc-middle">
+            <div class="brc-time-block">
+              <span class="brc-time">{{ bus.dep_fmt }}</span>
+              <span class="brc-city">{{ bus.source }}</span>
+            </div>
+            <div class="brc-duration">
+              <span>{{ bus.duration }}</span>
+              <div class="duration-line"><i class="fas fa-bus"></i></div>
+              <span class="brc-bus-no">{{ bus.bus_number }}</span>
+            </div>
+            <div class="brc-time-block">
+              <span class="brc-time">{{ bus.arr_fmt }}</span>
+              <span class="brc-city">{{ bus.destination }}</span>
+            </div>
+          </div>
+
+          <div class="brc-amenities">
+            {% for a in bus.amenity_list %}
+            <span class="amenity-tag">
+              {% if a=='WiFi' %}<i class="fas fa-wifi"></i>
+              {% elif a=='Charging' %}<i class="fas fa-plug"></i>
+              {% elif a=='Blanket' %}<i class="fas fa-bed"></i>
+              {% elif a=='Water' %}<i class="fas fa-tint"></i>
+              {% elif a=='Snacks' %}<i class="fas fa-cookie"></i>
+              {% else %}<i class="fas fa-check"></i>{% endif %}
+              {{ a }}
+            </span>
+            {% endfor %}
+          </div>
+
+          <div class="brc-bottom">
+            <div class="brc-seats">
+              <div class="seats-bar-wrap">
+                <div class="seats-bar" style="width:{{ ((bus.total_seats - bus.available_seats) / bus.total_seats * 100)|int }}%"></div>
+              </div>
+              <span class="seats-text">
+                {% if bus.available_seats <= 5 %}
+                  <span class="seats-low">Only {{ bus.available_seats }} left!</span>
+                {% else %}
+                  {{ bus.available_seats }} seats available
+                {% endif %}
+              </span>
+            </div>
+            <div class="brc-price-block">
+              <span class="brc-price">₹{{ "%.0f"|format(bus.price) }}</span>
+              <span class="per-seat">per seat</span>
+              <a href="{{ url_for('book', bus_id=bus.id, travel_date=travel_date) }}" class="btn-book">
+                Select Seats <i class="fas fa-chevron-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="no-results">
+          <i class="fas fa-bus-slash"></i>
+          <h3>No buses found</h3>
+          <p>No buses available from <strong>{{ source }}</strong> to <strong>{{ destination }}</strong> on {{ travel_date }}.</p>
+          <a href="{{ url_for('index') }}" class="btn-back">Try another search</a>
+        </div>
+      {% endif %}
+    </main>
+  </div>
+</div>
+{% endblock %}

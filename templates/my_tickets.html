@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}My Tickets — BusBook{% endblock %}
+
+{% block content %}
+<div class="tickets-page">
+  <div class="tickets-header">
+    <h1><i class="fas fa-ticket-alt"></i> My Tickets</h1>
+  </div>
+
+  <div class="email-lookup card">
+    <form action="{{ url_for('my_tickets') }}" method="GET" class="lookup-form">
+      <div class="form-group">
+        <label><i class="fas fa-envelope"></i> Enter your email to view bookings</label>
+        <input type="email" name="email" placeholder="you@example.com"
+               value="{{ email or '' }}" required/>
+      </div>
+      <button type="submit" class="btn-primary-full">
+        <i class="fas fa-search"></i> Find My Tickets
+      </button>
+    </form>
+  </div>
+
+  {% if email %}
+    {% if tickets %}
+      <p class="tickets-count">{{ tickets|length }} booking{{ 's' if tickets|length != 1 else '' }} for <strong>{{ email }}</strong></p>
+      <div class="ticket-list">
+        {% for t in tickets %}
+        <div class="ticket-card {{ t.status }}">
+          <div class="ticket-left">
+            <div class="ticket-status-bar"></div>
+          </div>
+          <div class="ticket-body">
+            <div class="ticket-top-row">
+              <div class="ticket-operator">
+                {{ t.operator_name }}
+                <span class="bus-type-badge type-{{ t.bus_type|replace(' ','-')|lower }}">{{ t.bus_type }}</span>
+                <span class="ticket-bus-no">{{ t.bus_number }}</span>
+              </div>
+              <span class="ticket-status-badge">
+                {% if t.status=='confirmed' %}<i class="fas fa-check-circle"></i>{% else %}<i class="fas fa-times-circle"></i>{% endif %}
+                {{ t.status|capitalize }}
+              </span>
+            </div>
+
+            <div class="ticket-route-row">
+              <div class="ticket-point">
+                <span class="ticket-time">{{ t.dep_fmt }}</span>
+                <span class="ticket-city">{{ t.source }}</span>
+              </div>
+              <div class="ticket-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+              <div class="ticket-point">
+                <span class="ticket-time">{{ t.arr_fmt }}</span>
+                <span class="ticket-city">{{ t.destination }}</span>
+              </div>
+            </div>
+
+            <div class="ticket-meta-row">
+              <span><i class="fas fa-calendar"></i> {{ t.travel_date }}</span>
+              <span><i class="fas fa-chair"></i> Seat {{ t.seat_number }}</span>
+              <span><i class="fas fa-user"></i> {{ t.passenger_name }}</span>
+              <span><i class="fas fa-phone"></i> {{ t.passenger_phone }}</span>
+              <span><i class="fas fa-rupee-sign"></i> {{ "%.0f"|format(t.price) }}</span>
+            </div>
+
+            {% if t.status=='confirmed' %}
+            <div class="ticket-actions">
+              <a href="{{ url_for('update', reservation_id=t.id) }}" class="btn-edit">
+                <i class="fas fa-edit"></i> Edit Details
+              </a>
+              <form action="{{ url_for('cancel', reservation_id=t.id) }}" method="POST"
+                    onsubmit="return confirm('Cancel this booking? Refund will be processed in 5-7 days.')">
+                <button type="submit" class="btn-cancel">
+                  <i class="fas fa-times"></i> Cancel Ticket
+                </button>
+              </form>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="no-results">
+        <i class="fas fa-ticket-alt"></i>
+        <h3>No bookings found</h3>
+        <p>No tickets found for <strong>{{ email }}</strong>.</p>
+        <a href="{{ url_for('index') }}" class="btn-back">Book a Ticket</a>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

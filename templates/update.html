@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Update Booking — BusBook{% endblock %}
+
+{% block content %}
+<div class="update-page">
+  <div class="book-header">
+    <a href="{{ url_for('my_tickets', email=reservation.passenger_email) }}" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to my tickets
+    </a>
+    <h1>Update Booking</h1>
+  </div>
+
+  <div class="book-layout single-col">
+    <div class="card bus-summary-card">
+      <div class="bsc-operator">{{ reservation.operator_name }}
+        <span class="bus-type-badge type-{{ reservation.bus_type|replace(' ','-')|lower }}">{{ reservation.bus_type }}</span>
+      </div>
+      <div class="bsc-route">
+        <div class="bsc-point">
+          <span class="bsc-time">{{ reservation.dep_fmt }}</span>
+          <span class="bsc-city">{{ reservation.source }}</span>
+        </div>
+        <div class="bsc-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+        <div class="bsc-point">
+          <span class="bsc-city">{{ reservation.destination }}</span>
+        </div>
+      </div>
+      <div class="bsc-meta">
+        <span><i class="fas fa-calendar"></i> {{ reservation.travel_date }}</span>
+        <span><i class="fas fa-chair"></i> Seat {{ reservation.seat_number }}</span>
+        <span><i class="fas fa-bus"></i> {{ reservation.bus_number }}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fas fa-user-edit"></i> Edit Passenger Details</h3>
+      <form action="{{ url_for('update', reservation_id=reservation.id) }}" method="POST">
+        <div class="form-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" name="passenger_name" value="{{ reservation.passenger_name }}" required/>
+        </div>
+        <div class="form-group">
+          <label>Email Address <span class="req">*</span></label>
+          <input type="email" name="passenger_email" value="{{ reservation.passenger_email }}" required/>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number <span class="req">*</span></label>
+          <input type="tel" name="passenger_phone" value="{{ reservation.passenger_phone }}" required/>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-confirm">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+          <a href="{{ url_for('my_tickets', email=reservation.passenger_email) }}" class="btn-discard">
+            Discard
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

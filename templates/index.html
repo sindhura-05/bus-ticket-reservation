@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}BusBook — Book Bus Tickets Online{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1><i class="fas fa-bus"></i> Book Bus Tickets</h1>
+    <p>40+ routes · Instant confirmation · Best prices guaranteed</p>
+
+    <div class="search-box">
+      <form action="{{ url_for('search') }}" method="GET" id="searchForm">
+        <div class="search-row">
+          <div class="search-field">
+            <label><i class="fas fa-map-marker-alt"></i> From</label>
+            <input type="text" name="source" id="sourceInput" placeholder="Enter city" autocomplete="off" required list="city-list"/>
+          </div>
+          <button type="button" class="swap-btn" onclick="swapCities()" title="Swap">
+            <i class="fas fa-exchange-alt"></i>
+          </button>
+          <div class="search-field">
+            <label><i class="fas fa-map-marker"></i> To</label>
+            <input type="text" name="destination" id="destInput" placeholder="Enter city" autocomplete="off" required list="city-list"/>
+          </div>
+          <div class="search-field search-field-date">
+            <label><i class="fas fa-calendar-alt"></i> Date</label>
+            <input type="date" name="travel_date" id="dateInput" value="{{ today }}" min="{{ today }}" required/>
+          </div>
+          <button type="submit" class="btn-search">
+            <i class="fas fa-search"></i> Search Buses
+          </button>
+        </div>
+      </form>
+      <datalist id="city-list">
+        {% for city in cities %}<option value="{{ city }}">{% endfor %}
+      </datalist>
+    </div>
+  </div>
+</section>
+
+<!-- Features strip -->
+<section class="features-strip">
+  <div class="features-inner">
+    <div class="feature-item"><i class="fas fa-shield-alt"></i><span>Safe Travel</span></div>
+    <div class="feature-item"><i class="fas fa-bolt"></i><span>Instant Booking</span></div>
+    <div class="feature-item"><i class="fas fa-undo"></i><span>Easy Cancellation</span></div>
+    <div class="feature-item"><i class="fas fa-headset"></i><span>24/7 Support</span></div>
+    <div class="feature-item"><i class="fas fa-tag"></i><span>Best Prices</span></div>
+  </div>
+</section>
+
+<!-- Popular routes -->
+<section class="popular-section">
+  <div class="section-container">
+    <h2 class="section-heading">Popular Routes</h2>
+    <div class="routes-grid">
+      {% set popular = [
+        ('Chennai','Hyderabad','from ₹650'),('Chennai','Bangalore','from ₹350'),
+        ('Mumbai','Pune','from ₹200'),('Hyderabad','Bangalore','from ₹550'),
+        ('Delhi','Jaipur','from ₹400'),('Bangalore','Mysore','from ₹150'),
+        ('Mumbai','Bangalore','from ₹950'),('Delhi','Mumbai','from ₹1200')
+      ] %}
+      {% for src, dst, price in popular %}
+      <a href="{{ url_for('search', source=src, destination=dst, travel_date=today) }}" class="route-card">
+        <div class="route-cities">
+          <span>{{ src }}</span>
+          <i class="fas fa-long-arrow-alt-right"></i>
+          <span>{{ dst }}</span>
+        </div>
+        <span class="route-price">{{ price }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Bus types -->
+<section class="bus-types-section">
+  <div class="section-container">
+    <h2 class="section-heading">Travel in Comfort</h2>
+    <div class="bus-types-grid">
+      <div class="bus-type-card"><i class="fas fa-couch"></i><h3>AC Sleeper</h3><p>Fully flat berths with AC</p></div>
+      <div class="bus-type-card"><i class="fas fa-chair"></i><h3>Volvo AC</h3><p>Premium Volvo coaches</p></div>
+      <div class="bus-type-card"><i class="fas fa-bus-alt"></i><h3>Semi-Sleeper</h3><p>Reclining seats with AC</p></div>
+      <div class="bus-type-card"><i class="fas fa-bus"></i><h3>Seater</h3><p>Budget-friendly travel</p></div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function swapCities() {
+  const s = document.getElementById('sourceInput');
+  const d = document.getElementById('destInput');
+  [s.value, d.value] = [d.value, s.value];
+}
+</script>
+{% endblock %}
